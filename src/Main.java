@@ -26,11 +26,10 @@ public class Main {
         int laps = 2;
         int curentlap=0;
 
-        Car maluch = new Car.Builder()
+        Car maluch = new Car.Builder(carModeling())
                 .setPosition(startPositon.copy())
                 .setFacing(startAngle)
                 .build();
-        Model carModel = carModeling();
         Checkpoint[] checkpoints = setCheckpoints();
         Checkpoint meta = checkpoints[checkpoints.length-1];
         ArrayList<Road> roads = mapRoad();
@@ -102,14 +101,14 @@ public class Main {
             pov = povbuffor.getFirst();
             switch (currentCamera) {
                 case 0:
-                    a.render(carModel.rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
+                    a.render(maluch.getModel().rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
                                     maluch.getPosition().getY()), light, 450,
                             new MPoint3d(maluch.getPosition().getX() - 20, maluch.getPosition().getY(), 80),  //camera
                             new MPoint3d(maluch.getPosition().getX() + 20, maluch.getPosition().getY(), 20),   //facing
                             new MPoint3d(maluch.getPosition().getX() + 1, maluch.getPosition().getY(), 300));  //top
                     break;
                 case 1:
-                    a.renderv(carModel.rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
+                    a.renderv(maluch.getModel().rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
                                     maluch.getPosition().getY()), light, 450,
                             new MPoint3d(maluch.getPosition().getX(), maluch.getPosition().getY(), 80),  //camera
                             new MVector3D(pov.getX(),pov.getY(),-3),   //facing
@@ -218,12 +217,5 @@ public class Main {
         carModel = carModel.merge(Modleling.rectangle(10, 5, 10, new MPoint3d(-10, -20, 0), Color.BLACK));
         carModel = carModel.merge(Modleling.rectangle(10, 5, 10, new MPoint3d(10, -20, 0), Color.BLACK));
         return carModel;
-    }
-
-    static void reset(Car car){
-        car.setPosition(startPositon.copy());
-        car.setFacing(startAngle);
-        car.stop();
-        car.setGear(1);
     }
 }

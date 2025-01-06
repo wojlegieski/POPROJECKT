@@ -103,18 +103,15 @@ public class GameFrame extends JFrame {
     public boolean isLeftPressed() {
         return left;
     }
-
     public boolean isRightPressed() {
         return right;
     }
-
     public boolean isUpPressed() {
         return up;
     }
     public boolean isTapkeyPressed() {
         return tapkey;
     }
-
     public boolean isDownPressed() {
         return down;
     }

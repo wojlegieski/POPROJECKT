@@ -3,19 +3,16 @@ import MyMath.MVector3D;
 import MyMath.Model;
 import samochod.Car;
 import samochod.Position;
-import track.Road;
-import java.util.List;
 
-public class graphcsystem {
+
+public class GraphcSystem {
     private  GameFrame gameFrame;
-    private List<Road> roadas;
     private MPoint3d light;
     float focalLength;
 
-    public graphcsystem(GameFrame gameFrame, List<Road> roada,MPoint3d light,float focalLength) {
+    public GraphcSystem(GameFrame gameFrame, MPoint3d light, float focalLength) {
         this.gameFrame = gameFrame;
         this.focalLength=focalLength;
-        this.roadas = roada;
         this.light=light;
     }
     public void render(Car car, int currentCamera, double time, Position lastPosition){
