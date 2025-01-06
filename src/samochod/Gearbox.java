@@ -54,6 +54,10 @@ public class Gearbox extends CarPart {
         }
     }
 
+    public void setCurrentGear(int gear){
+        currentGear = gear;
+    }
+
     public void upshift() {
         try {
             if (!clutch.isEngaged()) {

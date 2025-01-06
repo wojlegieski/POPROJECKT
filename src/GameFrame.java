@@ -7,7 +7,7 @@ import track.Road;
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
+//TODO speedometer rpm meter and time meter
 
 public class GameFrame extends JFrame {
     GamePanel gamePanel;
@@ -20,6 +20,7 @@ public class GameFrame extends JFrame {
     boolean qkey;
     boolean pkey;
     boolean tapkey;
+    boolean enterkey;
     GameFrame() {
         gamePanel = new GamePanel();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,6 +60,9 @@ public class GameFrame extends JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_Z) {
                     tapkey=true;
                 }
+                if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    enterkey=true;
+                }
 
             }
             @Override
@@ -90,6 +94,9 @@ public class GameFrame extends JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_Z) {
                     tapkey=false;
                 }
+                if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    enterkey=false;
+                }
             }
         });
     }
@@ -120,6 +127,8 @@ public class GameFrame extends JFrame {
     public boolean isQkeyPressed() {
         return qkey;
     }
+    public boolean isEnterkeyPressed() {return enterkey; }
+
     public void render(Model model, MPoint3d light, float h, MPoint3d c,MPoint3d facingpoint,MPoint3d top) {
         gamePanel.invalidate();
         gamePanel.updateScene(model, light, h, c,facingpoint,top);

@@ -15,7 +15,7 @@ public class    GamePanel extends JPanel {
     MVector3D facing;
     float darklightratio=0.01f;
     int revdec=200000;
-    boolean odl=true;
+    boolean odl=false;
     String idk;
     MPoint3d top;
     Checkpoint[] checkpoints;
@@ -97,22 +97,14 @@ public class    GamePanel extends JPanel {
             Polygon polygon = new Polygon();
             MPoint3d[] points = wall.getPoints();
             for(MPoint3d p : points){
-                Point2D poi = p.toPoint(c,h, facing,top,getWidth(),getHeight());
-                if(Double.isNaN(poi.getY())){System.out.println(p);System.out.println(p.toPoint(c,h, facing,top,getWidth(),getHeight()));
-                    System.out.println("center"+c);
-                    System.out.println("facal"+h);
-                    System.out.println("facing"+facing);
-                    System.out.println("top"+top);
-                    System.out.println(getWidth());
-                    System.out.println(getHeight());
-                }
                 polygon.addPoint((int) p.toPoint(c,h, facing,top,getWidth(),getHeight()).getX(),(int) p.toPoint(c,h, facing,top,getWidth(),getHeight()).getY());
             }
+            MPoint3d focallength=c.add(facing.setlength(h).revese());
             MVector3D v1=points[0].diffvec(points[1]);
             MVector3D v2=points[0].diffvec(points[2]);
             MVector3D vl=wall.getMidle().diffvec(light);
             MVector3D vs=v1.vecp(v2);
-            if(wall.getMidle().add(vs).diffvec(c).abs()<wall.getMidle().add(vs.revese()).diffvec(c).abs()){
+            if(wall.getMidle().add(vs).diffvec(focallength).abs()<wall.getMidle().add(vs.revese()).diffvec(focallength).abs()){
                 vs=vs.revese();
             }
             Color finacolor;
@@ -151,5 +143,6 @@ public class    GamePanel extends JPanel {
         g2d.setColor(Color.white);
         g2d.setFont(new Font("Arial", Font.BOLD, 30));
         g2d.drawString("You finished the race in " + time + " seconds!", 100, 100);
+        g2d.drawString("Pres enter to reset",100,200);
     }
 }

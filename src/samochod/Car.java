@@ -6,105 +6,104 @@ public class Car {
     private static final double TIRE_WIDTH = 1.0;
     private static final double ROLLING_RESISTANCE_COEFF = 0.01;
     private static final double GRAVITY = 9.81;
+    private static final double DEFAULT_SPEED_REDUCTION_THRESHOLD = 10;
+    private static final double DEFAULT_ROAD_SPEED_REDUCTION = 0.5;
 
     private Engine engine;
     private Position position;
     private Gearbox gearbox;
     private boolean engineOn;
     private String registrationNumber;
-    private String model;
+    private String modelName;
     private float speed;
     private float facing;
     private float tireRadius;
     private int weight;
-    private double wheelBase;
+    private double wheelBase;     // Unused but retained
 
-    public Car(Engine engine, Position position, Gearbox gearbox, String registrationNumber, String model, float facing) {
-        this.engine = engine;
-        this.gearbox = gearbox;
-        this.position = position;
+    public Car(Builder builder) {
+        this.engine = builder.engine;
+        this.gearbox = builder.gearbox;
+        this.position = builder.position;
         this.engineOn = false;
-        this.registrationNumber = registrationNumber;
-        this.model = model;
-        this.facing = facing;
-        this.tireRadius = 40;
-        this.weight = 800;
-        engine.start();
+        this.registrationNumber = builder.registrationNumber;
+        this.modelName = builder.modelName;
+        this.facing = builder.facing;
+        this.tireRadius = builder.tireRadius;
+        this.weight = builder.weight;
     }
 
-    public void wlacz() {
-        engineOn = true;
-        engine.start();
-    }
-
-    public void wylacz() {
+    public void turnOff() {
         engineOn = false;
         engine.stop();
     }
 
-    public int getWaga() {
+    public void turnOn() {
+        engineOn = true;
+        engine.start();
+    }
+
+    public int getTotalWeight() {
         return engine.getWaga() + gearbox.getWaga() + weight;
     }
 
-    public float getAktPredkosc() {
+    public float getCurrentSpeed() {
         return gearbox.getCurrentRatio() * engine.getCurrentRPM();
     }
 
-    public Position getPozycja() {
+    public Position getPosition() {
         return position;
     }
 
-    public double maxPredkosc() {
+    public double calculateMaxSpeed() {
         double power = engine.calculateMaxPower();
         return Math.round(Math.pow(power / (DRAG_COEFFICIENT * TIRE_WIDTH * AIR_DENSITY), 1.0 / 3.0));
     }
 
+    public void setGear(int gear) {
+        gearbox.setCurrentGear(gear);
+    }
+
     public void move(boolean onRoad) {
-        double[] dragAndResistance = calculateDragAndResistance(speed);
-        double fdrag = dragAndResistance[0];
-        double rollingResistance = dragAndResistance[1];
+        double dragForce = calculateDragForce(speed);
+        double rollingResistance = calculateRollingResistance();
 
         if (speed >= 0) {
-            if (!onRoad && speed > 10) {
-                speed -= 0.5;
+            if (!onRoad && speed > DEFAULT_SPEED_REDUCTION_THRESHOLD) {
+                speed -= DEFAULT_ROAD_SPEED_REDUCTION;
             }
-            speed -= (fdrag + rollingResistance) / getWaga()*0.2;
+            speed -= (dragForce + rollingResistance) / getTotalWeight() * 0.2;
         } else {
-            if (!onRoad && speed < -10) {
-                speed += 0.5;
+            if (!onRoad && speed < -DEFAULT_SPEED_REDUCTION_THRESHOLD) {
+                speed += DEFAULT_ROAD_SPEED_REDUCTION;
             }
-            speed += (fdrag + rollingResistance) / getWaga()*0.2;
+            speed += (dragForce + rollingResistance) / getTotalWeight() * 0.2;
         }
-
         position.movepolar(facing, speed / 4);
         engine.setCurrentRPM((int) (gearbox.getCurrentRatio() * speed / tireRadius * 1000));
     }
 
-    private double[] calculateDragAndResistance(float speed) {
-        double fdrag = 0.5 * AIR_DENSITY * DRAG_COEFFICIENT * TIRE_WIDTH * speed * speed;
-        double rollingResistance = ROLLING_RESISTANCE_COEFF * getWaga() * GRAVITY;
-        return new double[]{fdrag, rollingResistance};
+    private double calculateDragForce(float speed) {
+        return 0.5 * AIR_DENSITY * DRAG_COEFFICIENT * TIRE_WIDTH * speed * speed;
+    }
+
+    private double calculateRollingResistance() {
+        return ROLLING_RESISTANCE_COEFF * getTotalWeight() * GRAVITY;
     }
 
     public void accelerate() {
-        if (engineOn) {
-        if (engine.getCurrentRPM() < engine.getMaxRPM()) {
+        if (engineOn && engine.getCurrentRPM() < engine.getMaxRPM()) {
             if (engine.getCurrentRPM() < -engine.getMaxRPM()) {
                 engine.setCurrentRPM(-engine.getMaxRPM() + 1);
             }
             double force = (engine.getCurrentTorque() / tireRadius) * gearbox.getCurrentRatio() * 2.5;
-            double acceleration = force / getWaga();
+            double acceleration = force / getTotalWeight();
             speed += acceleration;
-        }
         }
     }
 
     public void brake() {
-        if (speed - 0.5 > 0) {
-            speed -= 1;
-        } else {
-            speed = 0;
-        }
+        speed = Math.max(0, speed - 1);
     }
 
     public void left() {
@@ -141,10 +140,76 @@ public class Car {
 
     @Override
     public String toString() {
-        return "rpm:" + engine.getCurrentRPM() + "\n" + "speed:" + (int) speed + "\n" + "gear:" + gearbox.getCurrentGear();
+        return "rpm:" + engine.getCurrentRPM() + "\n"
+                + "speed:" + (int) speed + "\n"
+                + "gear:" + gearbox.getCurrentGear();
     }
 
     public int getObroty() {
         return engine.getCurrentRPM();
     }
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+    public void setFacing(float facing) {
+        this.facing = facing;
+    }
+
+    public static class Builder {
+        private Engine engine;
+        private Position position;
+        private Gearbox gearbox;
+        private String registrationNumber;
+        private String modelName;
+        private float facing;
+        private float tireRadius;
+        private int weight;
+        public Builder() {
+            engine=new Engine("basic",400,500);
+            gearbox=new Gearbox("basic",200,1000);
+            registrationNumber="ABC123";
+            modelName="Basic Car";
+            facing=0;
+            position=new Position(0,0);
+            tireRadius=40;
+            weight=800;
+        }
+
+        public Builder setEngine(Engine engine) {
+            this.engine = engine;
+            return this;
+        }
+        public Builder setPosition(Position position) {
+            this.position = position;
+            return this;
+        }
+        public Builder setGearbox(Gearbox gearbox) {
+            this.gearbox = gearbox;
+            return this;
+        }
+        public Builder setRegistrationNumber(String registrationNumber) {
+            this.registrationNumber = registrationNumber;
+            return this;
+        }
+        public Builder setModelName(String modelName) {
+            this.modelName = modelName;
+            return this;
+        }
+        public Builder setFacing(float facing) {
+            this.facing = facing;
+            return this;
+        }
+        public Builder setTireRadius(float tireRadius) {
+            this.tireRadius = tireRadius;
+            return this;
+        }
+        public Builder setWeight(int weight) {
+            this.weight = weight;
+            return this;
+        }
+        public Car build() {
+            return new Car(this);
+        }
+    }
+
 }
