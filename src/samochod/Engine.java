@@ -68,7 +68,7 @@ public class Engine extends CarPart {
             double power = torqueCurve[rpm] * rpm * POWER_CONSTANT;
             if (power > maxPower) {
                 maxPower = power;
-            }
+            }   
         }
         return maxPower;
     }

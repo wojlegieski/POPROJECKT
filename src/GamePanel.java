@@ -78,7 +78,11 @@ public class    GamePanel extends JPanel {
                     Point2D poi = p1.toPoint(c,h, facing,top,getWidth(),getHeight());
                     p.addPoint((int) poi.getX(),(int) poi.getY());
                 }
-                g2d.setColor(checkpoint.getColor());
+                if(checkpoint.drivedon()) {
+                    g2d.setColor(new Color(0x00FF2D));
+                }else{
+                    g2d.setColor(checkpoint.getColor());
+                }
                 g2d.fillPolygon(p);
             }
         }

@@ -1,4 +1,5 @@
 package samochod;
+import MyMath.Model;
 
 public class Car {
     private static final double DRAG_COEFFICIENT = 0.3;
@@ -19,7 +20,7 @@ public class Car {
     private float facing;
     private float tireRadius;
     private int weight;
-    private double wheelBase;     // Unused but retained
+    private Model model;
 
     public Car(Builder builder) {
         this.engine = builder.engine;
@@ -31,6 +32,7 @@ public class Car {
         this.facing = builder.facing;
         this.tireRadius = builder.tireRadius;
         this.weight = builder.weight;
+        this.model=builder.model;
     }
 
     public void turnOff() {
@@ -137,6 +139,9 @@ public class Car {
     public void shiftDown() {
         gearbox.downshift();
     }
+    public Model getModel() {
+        return model;
+    }
 
     @Override
     public String toString() {
@@ -164,7 +169,8 @@ public class Car {
         private float facing;
         private float tireRadius;
         private int weight;
-        public Builder() {
+        private Model model;
+        public Builder(Model model) {
             engine=new Engine("basic",400,500);
             gearbox=new Gearbox("basic",200,1000);
             registrationNumber="ABC123";
@@ -173,6 +179,7 @@ public class Car {
             position=new Position(0,0);
             tireRadius=40;
             weight=800;
+            this.model=model;
         }
 
         public Builder setEngine(Engine engine) {

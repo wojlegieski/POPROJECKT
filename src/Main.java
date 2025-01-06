@@ -18,13 +18,12 @@ public class Main {
     public static void main(String[] args) {
 
 
-        boolean shouldReset = false; //TODO impement rest on button
         boolean wasEKeyNotPressed = true;
         boolean wasQKeyNotPressed = true;
         boolean wasTabNotPressed = true;
         int currentCamera = 0;
         int cameraCount = 2;
-        int laps = 1;
+        int laps = 2;
         int curentlap=0;
 
         Car maluch = new Car.Builder()
@@ -58,7 +57,7 @@ public class Main {
             }
             for(Checkpoint c : checkpoints) {
                 if(c!=meta) {
-                    if (c.drivedon() == false) {
+                    if (!c.drivedon()) {
                         end = false;
                         break;
                     }
@@ -112,7 +111,7 @@ public class Main {
                 case 1:
                     a.renderv(carModel.rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
                                     maluch.getPosition().getY()), light, 450,
-                            new MPoint3d(maluch.getPosition().getX() - 20, maluch.getPosition().getY(), 80),  //camera
+                            new MPoint3d(maluch.getPosition().getX(), maluch.getPosition().getY(), 80),  //camera
                             new MVector3D(pov.getX(),pov.getY(),-3),   //facing
                             new MPoint3d(maluch.getPosition().getX() + 1, maluch.getPosition().getY(), 300));  //top
                     break;
