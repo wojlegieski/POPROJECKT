@@ -14,8 +14,8 @@ public class    GamePanel extends JPanel {
     MPoint3d c;
     MVector3D facing;
     float darklightratio=0.01f;
-    int revdec=200000;
-    boolean odl=false;
+    int revdec=5000000;
+    boolean odl=true;
     String idk;
     MPoint3d top;
     Checkpoint[] checkpoints;
@@ -95,7 +95,7 @@ public class    GamePanel extends JPanel {
                 g2d.fillPolygon(p);
             }
         }
-        MWall[] ws=model.getWallsort(c);
+        MWall[] ws=model.getWallsort(c.add(facing.setlength(h).revese()));
         g2d.setColor(new Color(0,0,0));
         for(MWall w:ws) {
             Polygon p = new Polygon();

@@ -10,7 +10,7 @@ import java.util.List;
 public class Main {
 
     static int ROAD_SCALE = 300;
-    static int MODEL_UPSCALE_COUNT = 2;
+    static int MODEL_UPSCALE_COUNT = 1;
     static Position startPositon=new Position(-300,150);
     static float startAngle=(float) Math.PI;
 
@@ -22,7 +22,7 @@ public class Main {
         Checkpoint[] checkpoints = setCheckpoints();
         ArrayList<Road> roads = mapRoad();
         MPoint3d light = new MPoint3d(500, 100, 2000);
-        Game game= new Game(maluch,startPositon,startAngle,1,roads,checkpoints,light,450);
+        Game game= new Game(maluch,startPositon,startAngle,2,roads,checkpoints,light,450);
         game.start();
 
     }

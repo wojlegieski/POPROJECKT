@@ -17,7 +17,7 @@ public class Game {
     static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
     private float startAngle;
     private double laps;
-    private int cameraCount=2;
+    private int cameraCount=3;
     private int[] currentCamera={0};
     private int currentLap;
     private List<Road> roads;
