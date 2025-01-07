@@ -36,9 +36,6 @@ public class GraphcSystem {
         }
 
     }
-    public boolean isEnterKeyPressed() {
-        return gameFrame.isEnterkeyPressed();
-    }
 
     public void displayEndScreen(double time) {
         gameFrame.endScreen(time);

@@ -8,171 +8,23 @@ import java.util.List;
 
 
 public class Main {
-    static int TARGET_FPS = 60;
-    static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
+
     static int ROAD_SCALE = 300;
     static int MODEL_UPSCALE_COUNT = 2;
     static Position startPositon=new Position(-300,150);
     static float startAngle=(float) Math.PI;
 
     public static void main(String[] args) {
-
-
-        boolean wasEKeyNotPressed = true;
-        boolean wasQKeyNotPressed = true;
-        boolean wasTabNotPressed = true;
-        int currentCamera = 0;
-        int cameraCount = 2;
-        int laps = 2;
-        int curentlap=0;
-
         Car maluch = new Car.Builder(carModeling())
                 .setPosition(startPositon.copy())
                 .setFacing(startAngle)
                 .build();
         Checkpoint[] checkpoints = setCheckpoints();
-        Checkpoint meta = checkpoints[checkpoints.length-1];
         ArrayList<Road> roads = mapRoad();
         MPoint3d light = new MPoint3d(500, 100, 200);
-        GameFrame a = new GameFrame();;
-        a.setCheckpints(checkpoints);
-        a.setRoads(roads.toArray(new Road[roads.size()]));
-        boolean end = false;
-        ToneGenerator toneThread = new ToneGenerator();
-        toneThread.start();
-        boolean onroad=true;
-        List<Position> povbuffor = new ArrayList<>();
-        maluch.turnOn();
-        double stime = System.nanoTime();
+        Game game= new Game(maluch,startPositon,startAngle,2,roads,checkpoints,light,450);
+        game.start();
 
-        while (true) {
-            long startTime = System.nanoTime();
-            double time = (System.nanoTime() - stime)/1_000_000_000;
-            toneThread.setFrequency(maluch.getObroty()/60);
-            for(Checkpoint c : checkpoints) {
-                if(c!=meta) {
-                    c.isin(maluch.getPosition());
-                }
-            }
-            for(Checkpoint c : checkpoints) {
-                if(c!=meta) {
-                    if (!c.drivedon()) {
-                        end = false;
-                        break;
-                    }
-                    end = true;
-                }
-            }
-            if(end) {
-                meta.isin(maluch.getPosition());
-                if(meta.drivedon()==true) {
-                    curentlap++;
-                    for (Checkpoint c : checkpoints) {
-                        c.setwason(false);
-                    }
-                    if(curentlap==laps) {
-                        toneThread.stopEngine();
-                        a.endScreen(time);
-                        while (true) {
-                            System.out.println();
-                            if(a.isEnterkeyPressed()){
-                                end = false;
-                                reset(maluch);
-                                stime = System.nanoTime();
-                                curentlap=0;
-                                toneThread=new ToneGenerator();
-                                toneThread.start();
-                                break;
-                            }
-                        }
-
-                    }
-
-                }
-            }
-
-            Position tpow = new Position(0,0);
-            tpow.movepolar(maluch.getFacing(),3);
-            povbuffor.add(tpow);
-            Position pov;
-            if (povbuffor.size() >= 15) {
-                povbuffor.removeFirst();
-            }
-            pov = povbuffor.getFirst();
-            switch (currentCamera) {
-                case 0:
-                    a.render(maluch.getModel().rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
-                                    maluch.getPosition().getY()), light, 450,
-                            new MPoint3d(maluch.getPosition().getX() - 20, maluch.getPosition().getY(), 80),  //camera
-                            new MPoint3d(maluch.getPosition().getX() + 20, maluch.getPosition().getY(), 20),   //facing
-                            new MPoint3d(maluch.getPosition().getX() + 1, maluch.getPosition().getY(), 300));  //top
-                    break;
-                case 1:
-                    a.renderv(maluch.getModel().rotate(maluch.getFacing()).moveby(maluch.getPosition().getX(),
-                                    maluch.getPosition().getY()), light, 450,
-                            new MPoint3d(maluch.getPosition().getX(), maluch.getPosition().getY(), 80),  //camera
-                            new MVector3D(pov.getX(),pov.getY(),-3),   //facing
-                            new MPoint3d(maluch.getPosition().getX() + 1, maluch.getPosition().getY(), 300));  //top
-                    break;
-            }
-
-            a.setText(String.format("%.1f",time)+maluch);
-            if (a.isUpPressed()) {
-                maluch.accelerate();
-            }
-            if (a.isDownPressed()) {
-                maluch.brake();
-            }
-            if (a.isLeftPressed()) {
-                maluch.left();
-            }
-            if (a.isRightPressed()) {
-                maluch.right();
-            }
-            if (a.isShiftPressed()) {
-                maluch.useClutch();
-            } else maluch.releaseClutch();
-            if (a.isQkeyPressed()) {
-                if (wasQKeyNotPressed) {
-                    maluch.shiftDown();
-                    wasQKeyNotPressed = false;
-                }
-            } else {
-                wasQKeyNotPressed = true;
-            }
-            if (a.isTapkeyPressed()){
-                if (wasTabNotPressed){
-                    currentCamera=(currentCamera+1)%cameraCount;
-                    wasTabNotPressed = false;
-                }
-            }
-            else {wasTabNotPressed = true;}
-            if (a.isEkeyPressed()) {
-                if (wasEKeyNotPressed) {
-                    maluch.shiftUp();
-                    wasEKeyNotPressed = false;
-                }
-            } else {
-                wasEKeyNotPressed = true;
-            }
-            for (Road road : roads) {
-                if(road.isPointInsidePolygon(maluch.getPosition())){
-                    onroad = true;
-                    break;
-                }
-                onroad = false;
-            }
-            maluch.move(onroad);
-            long elapsedTime = System.nanoTime() - startTime;
-            long sleepTime = OPTIMAL_TIME - elapsedTime;
-            if (sleepTime > 0) {
-                try {
-                    Thread.sleep(sleepTime / 1_000_000, (int) (sleepTime % 1_000_000));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
 
