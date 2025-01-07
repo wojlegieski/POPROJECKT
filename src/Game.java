@@ -39,7 +39,6 @@ public class Game {
         meta=checkpoints[checkpoints.length-1];
     }
     public void start(){
-        GameFrame gameFrame=new GameFrame();
         List<Position> povbuffor = new ArrayList<>();
         toneThread = new ToneGenerator();
         toneThread.start();

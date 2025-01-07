@@ -17,6 +17,7 @@ public class GraphcSystem {
     }
     public void render(Car car, int currentCamera, double time, Position lastPosition){
         Model carModel=car.getModel();
+        gameFrame.setText("time"+time+car);
         switch (currentCamera){
             case 0:
                 gameFrame.render(
