@@ -40,11 +40,9 @@ public class Game {
     }
     public void start(){
         List<Position> povbuffor = new ArrayList<>();
-        toneThread = new ToneGenerator();
-        toneThread.start();
         gameFrame.setRoads(roads.toArray(new Road[roads.size()]));
         gameFrame.setCheckpints(checkpoints);
-
+        car.turnOn();
         double startTime = System.nanoTime();
         inicjalize();
         while(true){
@@ -62,21 +60,22 @@ public class Game {
             toneThread.setFrequency(car.getObroty()/60f);
             pov = povbuffor.getFirst();
             checkpointCheck(car);
-            graphcSystem.render(car,currentCamera[0],time,pov);
             if(checkLapEnd(car)){
                 nextLap();
                 if(endOfLaps()){
                     toneThread.stopEngine();
                     graphcSystem.displayEndScreen(time);
                     while (true) {
-                        System.out.println();
+                        System.out.print("");
                         if(gameFrame.isEnterkeyPressed()){
+                            startTime=System.nanoTime();
                             inicjalize();
                             break;
                         }
                     }
                 }
             }
+            graphcSystem.render(car,currentCamera[0],time,pov);
             long elapsedTime = System.nanoTime() - frameTime;
             long sleepTime = OPTIMAL_TIME - elapsedTime;
             if (sleepTime > 0) {
