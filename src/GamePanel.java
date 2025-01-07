@@ -51,7 +51,16 @@ public class    GamePanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         if(model!=(null)){
             renderScene(g);
-            g2d.drawString(idk,300,300);
+        }
+        if(idk!=null){
+            g2d.setColor(Color.black);
+            int i =0;
+            g2d.setFont(new Font("Arial", Font.TRUETYPE_FONT, 20));
+            for(String s:idk.split("\n")) {
+                g2d.drawString(s, 100, 100+i*30);
+                i++;
+            }
+
         }
     }
 

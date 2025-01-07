@@ -21,7 +21,7 @@ public class Main {
                 .build();
         Checkpoint[] checkpoints = setCheckpoints();
         ArrayList<Road> roads = mapRoad();
-        MPoint3d light = new MPoint3d(500, 100, 200);
+        MPoint3d light = new MPoint3d(500, 100, 2000);
         Game game= new Game(maluch,startPositon,startAngle,1,roads,checkpoints,light,450);
         game.start();
 
