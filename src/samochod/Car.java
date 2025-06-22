@@ -7,7 +7,7 @@ public class Car {
     private static final double TIRE_WIDTH = 1.0;
     private static final double ROLLING_RESISTANCE_COEFF = 0.01;
     private static final double GRAVITY = 9.81;
-    private static final double DEFAULT_SPEED_REDUCTION_THRESHOLD = 200;
+    private static final double DEFAULT_SPEED_REDUCTION_THRESHOLD = 15;
     private static final double DEFAULT_ROAD_SPEED_REDUCTION = 0.5;
 
     private Engine engine;

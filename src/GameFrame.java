@@ -5,9 +5,9 @@ import track.Checkpoint;
 import track.Road;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-//TODO speedometer rpm meter and time meter
 
 public class GameFrame extends JFrame {
     GamePanel gamePanel;
@@ -22,14 +22,15 @@ public class GameFrame extends JFrame {
     boolean tapkey;
     boolean enterkey;
     GameFrame() {
-        gamePanel = new GamePanel();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Game");
-        this.add(gamePanel);
+        this.setMinimumSize(new Dimension(800, 600));
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setResizable(true);
+        setLocationRelativeTo(null);
+        showLogin();
+        setVisible(true);
         this.pack();
-        this.setVisible(true);
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -147,5 +148,27 @@ public class GameFrame extends JFrame {
     public void setRoads(Road[] roads){gamePanel.setRoads(roads);}
     public void endScreen(double time){
         gamePanel.endScreen(time);
+    }
+    public void switchToPanel(JPanel panel) {
+        setContentPane(panel);
+        revalidate();
+        repaint();
+    }
+    public void showLogin() {
+        LoginDialog login = new LoginDialog(this);
+        login.setVisible(true);
+        if (login.isSucceeded()) {
+            initGame();
+        } else {
+            dispose();
+        }
+
+    }
+
+    public void initGame() {
+        gamePanel = new GamePanel();
+        setContentPane(gamePanel);
+        revalidate();
+        repaint();
     }
 }
