@@ -1,0 +1,46 @@
+# https://flask.palletsprojects.com/en/3.0.x/config/#SECRET_KEY
+SECRET_KEY = 'dev'  # does not matter - for lab only
+                    # remember to change it if app is working in the production environment!!!
+
+JSON_SORT_KEYS = False
+BABEL_DEFAULT_LOCALE = 'en'
+PAGINATION_PER_PAGE = 5
+TEMPLATES_AUTO_RELOAD = True
+
+
+# Below you can find some Flask-Security-Too module directives
+# You can find their documentation here:
+# https://flask-security-too.readthedocs.io/en/stable/configuration.html
+SECURITY_PASSWORD_SALT = '167188741953294952065079255867006765106'  # does not matter - for lab only
+SECURITY_USERNAME_ENABLE = True
+SECURITY_USERNAME_REQUIRED = True
+SECURITY_REGISTERABLE = True
+SECURITY_CONFIRMABLE = False
+SECURITY_SEND_REGISTER_EMAIL = False
+SECURITY_SEND_PASSWORD_CHANGE_EMAIL = False
+SECURITY_SEND_PASSWORD_RESET_EMAIL = False
+SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL = False
+SECURITY_POST_REGISTER_VIEW = '/registered'
+
+SESSION_COOKIE_DOMAIN = '.lab.kis.agh.edu.pl'
+SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_NAME = "session"
+
+SECURITY_TOKEN_AUTHENTICATION_HEADER = "Authentication-Token"
+SECURITY_TOKEN_AUTHENTICATION_KEY = "auth_token"
+SECURITY_TOKEN_MAX_AGE = 3600
+
+SECURITY_JSON = True
+SECURITY_UNAUTHORIZED_VIEW = None
+
+SECURITY_TOKEN_AUTHENTICATION_HEADER = "Authentication-Token"
+SECURITY_API_ENABLED_METHODS = ["login", "logout", "register"]
+SECURITY_LOGIN_WITHOUT_CONFIRMATION = True
+SECURITY_USE_JSON = True
+
+RECAPTCHA_PUBLIC_KEY = "6LcLcHUrAAAAADR3DQzZ8f21B4XD5BYc9P10epyr"
+RECAPTCHA_PRIVATE_KEY = "6LcLcHUrAAAAAGRgbQ9mXIJRTE0jHZByJX-7Xrvu"
+
+WTF_CSRF_ENABLED = False
+SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS = True
+

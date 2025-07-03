@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Login</h2>
+<form id="login-form">
+  <input type="text" name="username" placeholder="Username" required><br>
+  <input type="password" name="password" placeholder="Password" required><br>
+  <div class="g-recaptcha" data-sitekey="{{ config['RECAPTCHA_PUBLIC_KEY'] }}"></div><br>
+  <button type="submit">Login</button>
+</form>
+<div id="login-response" class="mt-3"></div>
+<script>
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = e.target.username.value;
+  const password = e.target.password.value;
+  const recaptcha = grecaptcha.getResponse();
+
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password, recaptcha}), //user.., pass.., recaptcha
+    credentials: "include"
+  });
+  const json = await res.json();
+  document.getElementById("login-response").innerText = JSON.stringify(json);
+});
+</script>
+{% endblock %}

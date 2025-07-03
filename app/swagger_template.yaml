@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Blog API
+  version: 1.0.0
+paths:
+  /api/login:
+    post:
+      summary: Logowanie użytkownika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password, recaptcha]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                recaptcha:
+                  type: string
+      responses:
+        '200':
+          description: Zalogowano
+        '401':
+          description: Nieprawidłowe dane
+  /api/register:
+    post:
+      summary: Rejestracja użytkownika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password, recaptcha]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                recaptcha:
+                  type: string
+      responses:
+        '200':
+          description: Zarejestrowano
+        '400':
+          description: Błąd walidacji
