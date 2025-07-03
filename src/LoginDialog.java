@@ -1,7 +1,9 @@
 import javax.swing.*;
+import java.net.http.HttpClient;
 
 public class LoginDialog extends JDialog {
     private boolean succeeded;
+    private HttpClient client;
 
     public LoginDialog(JFrame parent) {
         super(parent, "Logowanie", true);
@@ -19,4 +21,8 @@ public class LoginDialog extends JDialog {
     public void setSucceeded(boolean succeeded) {
         this.succeeded = succeeded;
     }
+
+    public void setClient(HttpClient client) {this.client = client;}
+
+    public HttpClient getClient() {return client;}
 }

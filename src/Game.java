@@ -16,7 +16,7 @@ public class Game {
     static int TARGET_FPS = 60;
     static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
     private float startAngle;
-    private double laps;
+    private int laps;
     private int cameraCount=3;
     private int[] currentCamera={0};
     private int currentLap;
@@ -64,7 +64,7 @@ public class Game {
                 nextLap();
                 if(endOfLaps()){
                     toneThread.stopEngine();
-                    graphcSystem.displayEndScreen(time);
+                    graphcSystem.displayEndScreen(time, laps);
                     while (true) {
                         System.out.print("");
                         if(gameFrame.isEnterkeyPressed()){

@@ -8,6 +8,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Locale;
 
 public class GameFrame extends JFrame {
     GamePanel gamePanel;
@@ -21,6 +27,7 @@ public class GameFrame extends JFrame {
     boolean pkey;
     boolean tapkey;
     boolean enterkey;
+    HttpClient client;
     GameFrame() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Game");
@@ -146,26 +153,46 @@ public class GameFrame extends JFrame {
         gamePanel.setcheckpoints(checkpoints);
     }
     public void setRoads(Road[] roads){gamePanel.setRoads(roads);}
-    public void endScreen(double time){
+    public void endScreen(double time,int laps){
+        String body = String.format(Locale.US,
+                "{\"duration\": %.2f, \"count\": %d}", time, laps
+        );
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://jkorona.lab.kis.agh.edu.pl/api/timetable"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+        System.out.println("BODY: " + body);
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Status: " + response.statusCode());
+            System.out.println("Response: " + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Błąd wysyłania danych: " + e.getMessage(),
+                    "Błąd", JOptionPane.ERROR_MESSAGE);
+        }
+
         gamePanel.endScreen(time);
     }
-    public void switchToPanel(JPanel panel) {
-        setContentPane(panel);
-        revalidate();
-        repaint();
-    }
+
+
+
+
     public void showLogin() {
         LoginDialog login = new LoginDialog(this);
         login.setVisible(true);
         if (login.isSucceeded()) {
+            client = login.getClient();
             initGame();
         } else {
-            dispose();
+            System.exit(0);
         }
 
     }
 
-    public void initGame() {
+    public void initGame( ) {
         gamePanel = new GamePanel();
         setContentPane(gamePanel);
         revalidate();

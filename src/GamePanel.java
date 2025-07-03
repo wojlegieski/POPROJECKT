@@ -5,9 +5,10 @@ import track.Road;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.net.http.HttpClient;
 
 
-public class    GamePanel extends JPanel {
+public class GamePanel extends JPanel {
     Model model;
     MPoint3d light;
     float h;
@@ -23,7 +24,6 @@ public class    GamePanel extends JPanel {
     boolean vec;
     GamePanel() {
         this.setLayout(new BorderLayout());
-
     }
 
     public void updateScene(Model model, MPoint3d light, float h, MPoint3d c,MPoint3d facingpoint,MPoint3d top) {

@@ -48,7 +48,7 @@ public class GraphcSystem {
 
     }
 
-    public void displayEndScreen(double time) {
-        gameFrame.endScreen(time);
+    public void displayEndScreen(double time, int laps) {
+        gameFrame.endScreen(time, laps);
     }
 }
