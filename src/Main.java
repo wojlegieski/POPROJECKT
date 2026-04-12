@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Main {
     static int TARGET_FPS = 60;
-    static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
+    static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;  
     static int ROAD_SCALE = 300;
     static int MODEL_UPSCALE_COUNT = 2;
     static Position startPositon=new Position(-300,150);
@@ -47,6 +47,12 @@ public class Main {
         maluch.turnOn();
         double stime = System.nanoTime();
 
+        portConnect bridge = new portConnect();
+        bridge.connect(5005);
+        boolean remoteUp = false;
+        boolean remoteDown = false;
+        boolean remoteLeft = false;
+        boolean remoteRight = false;
         while (true) {
             long startTime = System.nanoTime();
             double time = (System.nanoTime() - stime)/1_000_000_000;
@@ -118,20 +124,57 @@ public class Main {
                     break;
             }
 
+
+            float[] angles = {-1.57f, -0.78f, -0.35f, 0, 0.35f, 0.78f, 1.57f}; // Kąty lidaru
+            StringBuilder lidarJson = new StringBuilder("[");
+            for (int i = 0; i < angles.length; i++) {
+                float dist = getDistanceToEdge(maluch.getPosition(), maluch.getFacing() + angles[i], roads);
+                lidarJson.append(String.format("%.1f", dist));
+                if (i < angles.length - 1) lidarJson.append(",");
+            }
+            lidarJson.append("]");
+
+            String jsonMsg = String.format(
+                    "{\"x\":%.2f, \"y\":%.2f, \"rpm\":%d, \"speed\":%.2f, \"lidar\":%s}\n",
+                    maluch.getPosition().getX(),
+                    maluch.getPosition().getY(),
+                    maluch.getObroty(),
+                    maluch.getSpeed(), // Zakładam, że masz taką metodę
+                    lidarJson
+            );
+
+            bridge.sendData(jsonMsg + "\n");
+            // 2. Odbieramy wszystkie czekające komendy
+            String cmd;
+            while ((cmd = bridge.receiveData()) != null) {
+                cmd = cmd.trim();
+                if (cmd.equals("RESET")) {
+                    reset(maluch);
+                    remoteUp = false; remoteDown = false;
+                    remoteLeft = false; remoteRight = false;
+                }
+                switch(cmd) {
+                    case "UP_ON":    remoteUp = true; break;
+                    case "UP_OFF":   remoteUp = false; break;
+                    case "LEFT_ON":  remoteLeft = true; break;
+                    case "LEFT_OFF": remoteLeft = false; break;
+                }
+            }
+
             a.setText(String.format("%.1f",time)+maluch);
-            if (a.isUpPressed()) {
+            if (a.isUpPressed() || remoteUp) {
                 maluch.accelerate();
             }
-            if (a.isDownPressed()) {
+            if (a.isDownPressed() || remoteDown) {
                 maluch.brake();
             }
-            if (a.isLeftPressed()) {
+            if (a.isLeftPressed() || remoteLeft) {
                 maluch.left();
             }
-            if (a.isRightPressed()) {
+            if (a.isRightPressed() || remoteRight) {
                 maluch.right();
             }
-            if (a.isShiftPressed()) {
+            if (a.isShiftPressed() || remoteLeft) {
                 maluch.useClutch();
             } else maluch.releaseClutch();
             if (a.isQkeyPressed()) {
@@ -167,6 +210,12 @@ public class Main {
             maluch.move(onroad);
             long elapsedTime = System.nanoTime() - startTime;
             long sleepTime = OPTIMAL_TIME - elapsedTime;
+
+
+
+
+
+
             if (sleepTime > 0) {
                 try {
                     Thread.sleep(sleepTime / 1_000_000, (int) (sleepTime % 1_000_000));
@@ -226,5 +275,26 @@ public class Main {
         car.setFacing(startAngle);
         car.stop();
         car.setGear(1);
+    }
+
+    public static float getDistanceToEdge(Position carPos, float angle, ArrayList<Road> roads) {
+        float maxDist = 500.0f; // Maksymalny zasięg "wzroku"
+        float step = 5.0f;     // Dokładność pomiaru
+
+        for (float d = 0; d < maxDist; d += step) {
+            Position checkPoint = new Position(carPos.getX(), carPos.getY());
+            checkPoint.movepolar(angle, d);
+
+            boolean onRoad = false;
+            for (Road r : roads) {
+                if (r.isPointInsidePolygon(checkPoint)) {
+                    onRoad = true;
+                    break;
+                }
+            }
+
+            if (!onRoad) return d; // Zwróć odległość, gdy trafimy na "pobocze"
+        }
+        return maxDist;
     }
 }
