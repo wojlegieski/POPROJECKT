@@ -13,7 +13,9 @@ public class    GamePanel extends JPanel {
     float h;
     MPoint3d c;
     MVector3D facing;
-    float darklightratio=0.01f;
+
+//    cieniowanie
+    float darklightratio=0.80f;
     int revdec=200000;
     boolean odl=false;
     String idk;
@@ -83,15 +85,15 @@ public class    GamePanel extends JPanel {
             }
         }
         MWall[] ws=model.getWallsort(c);
-        g2d.setColor(new Color(0,0,0));
-        for(MWall w:ws) {
-            Polygon p = new Polygon();
-            MPoint3d[] pos = w.getPoints();
-            for (MPoint3d p1 : pos) {
-                p.addPoint((int) p1.toshadow(light).toPoint(c,h, facing,top,getWidth(),getHeight()).getX(),(int) p1.toshadow(light).toPoint(c,h, facing,top,getWidth(),getHeight()).getY());
-            }
-            g2d.fillPolygon(p);
-        }
+//        g2d.setColor(new Color(0,0,0));
+//        for(MWall w:ws) {
+//            Polygon p = new Polygon();
+//            MPoint3d[] pos = w.getPoints();
+//            for (MPoint3d p1 : pos) {
+//                p.addPoint((int) p1.toshadow(light).toPoint(c,h, facing,top,getWidth(),getHeight()).getX(),(int) p1.toshadow(light).toPoint(c,h, facing,top,getWidth(),getHeight()).getY());
+//            }
+//            g2d.fillPolygon(p);
+//        }
         for (int i = ws.length-1; i >=0; i--) {
             MWall wall = ws[i];
             Polygon polygon = new Polygon();
