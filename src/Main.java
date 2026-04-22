@@ -10,7 +10,7 @@
 
 
     public class Main {
-        static int TARGET_FPS = 60;
+        static int TARGET_FPS = 120;
         static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
         static int ROAD_SCALE = 300;
         static int MODEL_UPSCALE_COUNT = 2;
@@ -131,27 +131,46 @@
                 float[] angles = {-1.57f, -0.78f, -0.35f, 0, 0.35f, 0.78f, 1.57f}; // Kąty lidaru
                 StringBuilder lidarJson = new StringBuilder("[");
                 for (int i = 0; i < angles.length; i++) {
-                    float dist = getDistanceToEdge(maluch.getPosition(), maluch.getFacing() + angles[i], trackArea);                    lidarJson.append(String.format("%.1f", dist));
+                    float dist =  getDistanceToEdge(maluch.getPosition(), maluch.getFacing() + angles[i], trackArea);
+                    lidarJson.append((int) dist);
                     if (i < angles.length - 1) lidarJson.append(",");
                 }
                 lidarJson.append("]");
                 int zaliczoneCheckpoints = 0;
+                Checkpoint targetCp = null; // Zmienna na nasz cel
+
                 for (Checkpoint c : checkpoints) {
-                    if (c.drivedon()) { // Używamy Twojej metody, o której wspomniałeś
+                    if (c.drivedon()) {
                         zaliczoneCheckpoints++;
+                    } else if (targetCp == null) {
+                        // Pierwszy niezliczony checkpoint staje się naszym celem!
+                        // (Dzięki temu, jeśli zaliczymy zwykłe, automatycznie wybierze metę)
+                        targetCp = c;
                     }
                 }
 
+                // Obliczanie dystansu do celu (Pitagoras)
+                float distToTarget = 0.0f;
+                if (targetCp != null) {
+                    float dx = maluch.getPosition().getX() - targetCp.getPosition().getX();
+                    float dy = maluch.getPosition().getY() - targetCp.getPosition().getY();
+                    distToTarget = (float) Math.sqrt(dx * dx + dy * dy);
+                }
+
                 String jsonMsg = String.format(java.util.Locale.US,
-                        "{\"x\":%.2f, \"y\":%.2f, \"rpm\":%d, \"speed\":%.2f, \"lidar\":%s, \"onRoad\":%b, \"checkpoints\":%d}\n",
+                        "{\"x\":%.2f, \"y\":%.2f, \"rpm\":%d, \"speed\":%.2f, \"lidar\":%s, \"onRoad\":%b, \"checkpoints\":%d, \"targetDist\":%.2f}\n",
                         maluch.getPosition().getX(),
                         maluch.getPosition().getY(),
                         maluch.getObroty(),
                         maluch.getSpeed(),
                         lidarJson,
                         onroad,
-                        zaliczoneCheckpoints
+                        zaliczoneCheckpoints,
+                        distToTarget
                 );
+
+                bridge.sendData(jsonMsg + "\n");
+
 
                 bridge.sendData(jsonMsg + "\n");
                 // 2. Odbieramy wszystkie czekające komendy
@@ -299,19 +318,32 @@
         }
 
         public static float getDistanceToEdge(Position carPos, float angle, Area trackArea) {
-            float maxDist = 500.0f; // Maksymalny zasięg "wzroku"
+            float maxDist = 2000.0f; // Maksymalny zasięg "wzroku"
             float step = 5.0f;      // Dokładność pomiaru
+
+            boolean startsOnTrack = trackArea.contains(carPos.getX(), carPos.getY());
 
             for (float d = 0; d < maxDist; d += step) {
                 Position checkPoint = new Position(carPos.getX(), carPos.getY());
                 checkPoint.movepolar(angle, d);
+                boolean currentPointOnTrack = trackArea.contains(checkPoint.getX(), checkPoint.getY());
 
-                // Jeśli punkt wychodzi poza złączony tor (Area), mamy krawędź
-                if (!trackArea.contains(checkPoint.getX(), checkPoint.getY())) {
-                    return d;
+                if (startsOnTrack) {
+                    if (!currentPointOnTrack) {
+                        return d;
+                    }
+                } else {
+
+                    if (currentPointOnTrack) {
+                        return -d;
+                    }
                 }
             }
-            return maxDist;
+            if (startsOnTrack) {
+                return maxDist;
+            } else {
+                return -maxDist;
+            }
         }
 
         static Area mergeRoadsToSingleArea(ArrayList<Road> roads) {

@@ -4,6 +4,7 @@ import MyMath.MPoint3d;
 import samochod.Position;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 public class Checkpoint {
     Position position;
@@ -50,5 +51,9 @@ public class Checkpoint {
     }
     public void setwason(boolean was){
         drivedon=was;
+    }
+
+    public Position getPosition() {
+        return position;
     }
 }
