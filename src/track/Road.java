@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import samochod.Position;
-public class Road {
+public class    Road {
     Point2D.Double[] polygon;
     Point2D pos;
     public Road(Point2D.Double[] polygon,Point2D pos) {
@@ -118,5 +118,8 @@ public class Road {
         return flip(d2pos);
     }
 
+    public Point2D.Double[] getPolygon() {
+        return this.polygon;
+    }
 }
 
