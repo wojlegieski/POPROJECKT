@@ -1,0 +1,8 @@
+# Prosta startowa, żeby model nabrał prędkości
+straight -350 150 200 200
+
+# Pierwszy zakręt 
+longtrun -850 450 800 revesex
+
+
+

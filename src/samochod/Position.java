@@ -1,5 +1,7 @@
 package samochod;
 
+import MyMath.MPoint3d;
+
 public class Position {
     float x;
     float y;
@@ -32,4 +34,6 @@ public class Position {
     public Position copy() {
         return new Position(x,y);
     }
+
+    public MPoint3d toMPoint3d() {return new MPoint3d(x,y,0);}
 }

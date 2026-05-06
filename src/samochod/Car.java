@@ -146,6 +146,9 @@ public class Car {
                 + "speed:" + (int) speed + "\n"
                 + "gear:" + gearbox.getCurrentGear();
     }
+    public int getCurrentGear() {
+        return gearbox.getCurrentGear();
+    }
 
     public int getObroty() {
         return engine.getCurrentRPM();

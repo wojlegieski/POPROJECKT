@@ -1,0 +1,8 @@
+# Checkpoint 1 (koniec pierwszej prostej, wejście w zakręt)
+-500, 150, 50, 400
+
+# Checkpoint 2 (środek pierwszego zakrętu)
+-1150, 850, 250, 50
+
+# Meta (koniec szykany na prostej)
+-1850, 1550, 50, 200, 255, 0, 0

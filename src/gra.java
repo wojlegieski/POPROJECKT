@@ -1,18 +1,25 @@
-import MyMath.*;
-import samochod.*;
-import track.*;
+import MyMath.MPoint3d;
+import MyMath.MVector3D;
+import MyMath.Model;
+import MyMath.Modleling;
+import samochod.Car;
+import samochod.Position;
+import track.Checkpoint;
+import track.Road;
+import track.Roadcreator;
+
 import java.awt.*;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
-import java.io.File;
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Main {
+public class gra {
     static int TARGET_FPS = 90;
     static int FRAME_SKIP = 1;
     static long OPTIMAL_TIME = 1_000_000_000 / TARGET_FPS;
@@ -21,20 +28,19 @@ public class Main {
     static Position startPositon=new Position(-300,150);
     static float startAngle=(float) Math.PI;
     static int targetLapsMap = 2;
-    static float MAX_DIST = 3000;
 
     public static void main(String[] args) {
         List<String> mapSequence = new ArrayList<>();
-//        mapSequence.add("1");
-//        mapSequence.add("7");
-//        mapSequence.add("10");
+        mapSequence.add("1");
+        mapSequence.add("7");
+        mapSequence.add("10");
 //        mapSequence.add("9");
 //        mapSequence.add("8");
 //        mapSequence.add("6");
 //        mapSequence.add("2");
 //        mapSequence.add("3");
 //        mapSequence.add("4");
-        mapSequence.add("5");
+//        mapSequence.add("5");
 
         int currentMapIndex = 0;
 
@@ -95,8 +101,8 @@ public class Main {
         maluch.turnOn();
         double stime = System.nanoTime();
 
-        portConnect bridge = new portConnect();
-        bridge.connect(5005);
+//        portConnect bridge = new portConnect();
+//        bridge.connect(5005);
         boolean remoteUp = false;
         boolean remoteDown = false;
         boolean remoteLeft = false;
@@ -110,34 +116,26 @@ public class Main {
             long startTime = System.nanoTime();
             double time = ( System.nanoTime() - stime)/1_000_000_000;
 //                toneThread.setFrequency(maluch.getObroty()/60);
-
-            int zaliczoneCheckpoints = 0;
-            float distToTarget = MAX_DIST;
-            end = true;
-
+            if(checkpoints.length==1){
+             end = true;
+            }
             for(Checkpoint c : checkpoints) {
                 if(c!=meta) {
                     c.isin(maluch.getPosition());
-                    if (c.drivedon()) {
-                        zaliczoneCheckpoints++;
-                    } else {
-                        end = false; // Znaleziono niezaliczony, więc to nie koniec
-
-                        // Liczenie odległości za pomocą nowej funkcji
-                        float currentDist = getDist(
-                                maluch.getPosition().getX(), maluch.getPosition().getY(),
-                                c.getPosition().getX(), c.getPosition().getY()
-                        );
-
-                        if (currentDist < distToTarget) {
-                            distToTarget = currentDist;
-                        }
+                }
+            }
+            for(Checkpoint c : checkpoints) {
+                if(c!=meta) {
+                    if (c.drivedon() == false) {
+                        end = false;
+                        break;
                     }
+                    end = true;
                 }
             }
             if(end) {
                 meta.isin(maluch.getPosition());
-                if(meta.drivedon()) {
+                if(meta.drivedon()==true) {
                     curentlap++;
                     if(curentlap==laps) {
 //                            toneThread.stopEngine();
@@ -198,6 +196,20 @@ public class Main {
             }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             Position tpow = new Position(0,0);
             tpow.movepolar(maluch.getFacing(),3);
             povbuffor.add(tpow);
@@ -250,8 +262,26 @@ public class Main {
 
 
             lidarJson.append("]");
+            int zaliczoneCheckpoints = 0;
+            Checkpoint targetCp = null; // Zmienna na nasz cel
 
+            for (Checkpoint c : checkpoints) {
+                if (c.drivedon()) {
+                    zaliczoneCheckpoints++;
+                } else if (targetCp == null) {
+                    // Pierwszy niezliczony checkpoint staje się naszym celem!
+                    // (Dzięki temu, jeśli zaliczymy zwykłe, automatycznie wybierze metę)
+                    targetCp = c;
+                }
+            }
 
+            // Obliczanie dystansu do celu (Pitagoras)
+            float distToTarget = 0.0f;
+            if (targetCp != null) {
+                float dx = maluch.getPosition().getX() - targetCp.getPosition().getX();
+                float dy = maluch.getPosition().getY() - targetCp.getPosition().getY();
+                distToTarget = (float) Math.sqrt(dx * dx + dy * dy);
+            }
             if (isWaitingForReset) {
                 onroad = true;
             }
@@ -279,58 +309,53 @@ public class Main {
                 maluch.releaseClutch();
             }
 
-            if(iterrator ==0){bridge.sendData(jsonMsg + "\n");
+//            if(iterrator ==0){bridge.sendData(jsonMsg + "\n");
 
                 String cmd;
-                while ((cmd = bridge.receiveData()) != null) {
-                    cmd = cmd.trim();
-                    if (cmd.equals("RESET")) {
-                        if (isWaitingForReset) {
-                            curentwins++;
-                            if(curentwins >= targetLapsMap) {
-                                currentMapIndex = (currentMapIndex + 1) % mapSequence.size();
-                                currentMapSuffix = mapSequence.get(currentMapIndex);
-                                checkpointsFile = "src/maps/checkpoints" + currentMapSuffix + ".txt";
-                                roadsFile = "src/maps/roads" + currentMapSuffix + ".txt";
-                                checkpoints = loadCheckpoints(checkpointsFile);
-                                meta = checkpoints[checkpoints.length-1];
-                                roads = loadMapRoad(roadsFile);
-                                a.setCheckpints(checkpoints);
-                                allCheckpoints = checkpoints.length;
-                                a.setRoads(roads.toArray(new Road[roads.size()]));
-                                trackArea = mergeRoadsToSingleArea(roads);
-                                curentwins = 0;
-                            }
-                        }
-                        reset(maluch);
-                        remoteUp = false; remoteDown = false;
-                        remoteLeft = false; remoteRight = false;
-                        stime = System.nanoTime();
-                        for(Checkpoint c:checkpoints){
-                            c.setwason(false);
-                        }
-                        curentlap = 0;
-                        isWaitingForReset = false;
-                        continue;
-                    }
-
-                    switch(cmd) {
-                        case "UP_ON":      remoteUp = true; break;
-                        case "UP_OFF":     remoteUp = false; break;
-                        case "DOWN_ON":    remoteDown = true; break;
-                        case "DOWN_OFF":   remoteDown = false; break;
-                        case "LEFT_ON":    remoteLeft = true; break;
-                        case "LEFT_OFF":   remoteLeft = false; break;
-                        case "RIGHT_ON":   remoteRight = true; break;
-                        case "RIGHT_OFF":  remoteRight = false; break;
-                    }
-                }
-            }
-
-            a.gamePanel.arrowUp = remoteUp;
-            a.gamePanel.arrowDown = remoteDown;
-            a.gamePanel.arrowLeft = remoteLeft;
-            a.gamePanel.arrowRight = remoteRight;
+//                while ((cmd = bridge.receiveData()) != null) {
+//                    cmd = cmd.trim();
+//                    if (cmd.equals("RESET")) {
+//                        if (isWaitingForReset) {
+//                            curentwins++;
+//                            if(curentwins >= targetLapsMap) {
+//                                currentMapIndex = (currentMapIndex + 1) % mapSequence.size();
+//                                currentMapSuffix = mapSequence.get(currentMapIndex);
+//                                checkpointsFile = "src/maps/checkpoints" + currentMapSuffix + ".txt";
+//                                roadsFile = "src/maps/roads" + currentMapSuffix + ".txt";
+//                                checkpoints = loadCheckpoints(checkpointsFile);
+//                                meta = checkpoints[checkpoints.length-1];
+//                                roads = loadMapRoad(roadsFile);
+//                                a.setCheckpints(checkpoints);
+//                                allCheckpoints = checkpoints.length;
+//                                a.setRoads(roads.toArray(new Road[roads.size()]));
+//                                trackArea = mergeRoadsToSingleArea(roads);
+//                                curentwins = 0;
+//                            }
+//                        }
+//                        reset(maluch);
+//                        remoteUp = false; remoteDown = false;
+//                        remoteLeft = false; remoteRight = false;
+//                        stime = System.nanoTime();
+//                        for(Checkpoint c:checkpoints){
+//                            c.setwason(false);
+//                        }
+//                        curentlap = 0;
+//                        isWaitingForReset = false;
+//                        continue;
+//                    }
+//
+//                    switch(cmd) {
+//                        case "UP_ON":      remoteUp = true; break;
+//                        case "UP_OFF":     remoteUp = false; break;
+//                        case "DOWN_ON":    remoteDown = true; break;
+//                        case "DOWN_OFF":   remoteDown = false; break;
+//                        case "LEFT_ON":    remoteLeft = true; break;
+//                        case "LEFT_OFF":   remoteLeft = false; break;
+//                        case "RIGHT_ON":   remoteRight = true; break;
+//                        case "RIGHT_OFF":  remoteRight = false; break;
+//                    }
+//                }
+//            }
             String displayStats = String.format(
                     "--- CAR STATS ---\n" +
                             "TIME: %.1f\n" +
@@ -350,18 +375,30 @@ public class Main {
             );
             iterrator = (iterrator + 1) % FRAME_SKIP;
             a.setText(displayStats);
-            if (remoteUp) {
+            if (a.isUpPressed() || remoteUp) {
                 maluch.accelerate();
             }
-            if (remoteDown) {
+            if (a.isDownPressed() || remoteDown) {
                 maluch.brake();
             }
-            if (remoteLeft) {
+            if (a.isLeftPressed() || remoteLeft) {
                 maluch.left();
             }
-            if (remoteRight) {
+            if (a.isRightPressed() || remoteRight) {
                 maluch.right();
             }
+//            if (remoteUp) {
+//                maluch.accelerate();
+//            }
+//            if (remoteDown) {
+//                maluch.brake();
+//            }
+//            if (remoteLeft) {
+//                maluch.left();
+//            }
+//            if (remoteRight) {
+//                maluch.right();
+//            }
             if (a.isShiftPressed()) {
                 maluch.useClutch();
             } else maluch.releaseClutch();
@@ -445,11 +482,7 @@ public class Main {
 
 
 
-    static float getDist(float x1, float y1, float x2, float y2) {
-        float dx = x1 - x2;
-        float dy = y1 - y2;
-        return (float) Math.sqrt(dx * dx + dy * dy);
-    }
+
 
 
     static ArrayList<Road> loadMapRoad(String filename) {

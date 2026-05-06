@@ -2,38 +2,48 @@ import java.io.*;
 import java.net.*;
 
 public class portConnect {
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private DatagramSocket socket;
+    private InetAddress clientAddress;
+    private int clientPort;
 
     public void connect(int port) {
         try {
-            System.out.println("Java: Oczekiwanie na połączenie z Pythonem na porcie " + port + "...");
-            serverSocket = new ServerSocket(port);
-            // Program zatrzyma się tutaj, dopóki nie uruchomisz skryptu Python
-            clientSocket = serverSocket.accept();
-
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            System.out.println("Java: Połączono z Pythonem!");
-        } catch (IOException e) {
+            System.out.println("Java: Oczekiwanie na pakiety UDP na porcie " + port + "...");
+            socket = new DatagramSocket(port);
+            // W UDP nie ma accept(). Adres klienta poznamy przy pierwszym odebranym pakiecie.
+            socket.setSoTimeout(10); // Mały timeout, żeby nie blokować pętli gry
+        } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
     public void sendData(String data) {
-        if (out != null) out.print(data); // Wysyłamy JSON
+        if (socket != null && clientAddress != null) {
+            try {
+                byte[] buffer = data.getBytes();
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
+                socket.send(packet);
+            } catch (IOException e) {
+                System.err.println("Błąd wysyłania pakietu UDP: " + e.getMessage());
+            }
+        }
     }
 
     public String receiveData() {
         try {
-            if (in != null && in.ready()) {
-                return in.readLine();
-            }
+            byte[] buffer = new byte[1024];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            socket.receive(packet);
+
+            this.clientAddress = packet.getAddress();
+            this.clientPort = packet.getPort();
+
+            return new String(packet.getData(), 0, packet.getLength()).trim();
+        } catch (SocketTimeoutException e) {
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }

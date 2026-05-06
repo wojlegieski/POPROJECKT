@@ -5,6 +5,7 @@ import track.Checkpoint;
 import track.Road;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 //TODO speedometer rpm meter and time meter
@@ -150,5 +151,8 @@ public class GameFrame extends JFrame {
     public void setRoads(Road[] roads){gamePanel.setRoads(roads);}
     public void endScreen(double time){
         gamePanel.endScreen(time);
+    }
+    public void setLidarHitPoints(java.util.List<MPoint3d>  lidarHitPoints){
+        gamePanel.setLidarHitPoints(lidarHitPoints);
     }
 }

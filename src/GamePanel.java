@@ -1,7 +1,7 @@
 import MyMath.*;
 import track.Checkpoint;
 import track.Road;
-
+import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -14,15 +14,51 @@ public class    GamePanel extends JPanel {
     MPoint3d c;
     MVector3D facing;
 
-//    cieniowanie
     float darklightratio=0.80f;
     int revdec=200000;
     boolean odl=false;
-    String idk;
+    String idk = "";
     MPoint3d top;
     Checkpoint[] checkpoints;
     Road[] roads;
     boolean vec;
+    java.util.List<MPoint3d>  lidarHitPoints;
+    // Wewnątrz klasy GamePanel
+    public boolean arrowUp, arrowDown, arrowLeft, arrowRight;
+
+    private void drawRemoteArrows(Graphics2D g2d) {
+        int size = 50;
+        int margin = 30;
+        int spacing = 10;
+        int baseX = margin + size + spacing;
+        int baseY = getHeight() - margin - size;
+        drawBox(g2d, baseX, baseY - size - spacing, size, arrowUp, "↑");    // GÓRA
+        drawBox(g2d, baseX - size - spacing, baseY, size, arrowLeft, "←");  // LEWO
+        drawBox(g2d, baseX, baseY, size, arrowDown, "↓");                  // DÓŁ
+        drawBox(g2d, baseX + size + spacing, baseY, size, arrowRight, "→"); // PRAWO
+    }
+
+    private void drawBox(Graphics2D g2d, int x, int y, int size, boolean active, String label) {
+        g2d.setColor(active ? new Color(255, 255, 0, 220) : new Color(50, 50, 50, 150));
+        g2d.fillRect(x, y, size, size);
+        g2d.setColor(Color.WHITE);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRect(x, y, size, size);
+        g2d.setFont(new Font("SansSerif", Font.BOLD, 25));
+        FontMetrics fm = g2d.getFontMetrics();
+        int lx = x + (size - fm.stringWidth(label)) / 2;
+        int ly = y + ((size - fm.getHeight()) / 2) + fm.getAscent();
+        g2d.drawString(label, lx, ly);
+    }
+
+
+
+
+
+
+
+
+
     GamePanel() {
         this.setLayout(new BorderLayout());
 
@@ -51,11 +87,23 @@ public class    GamePanel extends JPanel {
 
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        if(model!=(null)){
+        if (model != null) {
             renderScene(g);
-            g2d.drawString(idk,300,300);
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Monospaced", Font.BOLD, 14));
+            String[] lines = idk.split("\n");
+            int x = 20;
+            int y = 30;
+            int lineHeight = 20;
+            for (String line : lines) {
+                g2d.drawString(line, x, y);
+                y += lineHeight;
+            }
+            drawRemoteArrows(g2d);
         }
     }
+
+
 
     public void renderScene(Graphics g) {
         this.invalidate();
@@ -125,6 +173,19 @@ public class    GamePanel extends JPanel {
             g2d.fillPolygon(polygon);
 
         }
+        g2d.setColor(Color.black);
+        if( lidarHitPoints != null){
+            for (MPoint3d lidarPoint : new ArrayList<>(lidarHitPoints)) {
+                if (lidarPoint == null) {
+                    continue;
+                }
+                Point2D p = lidarPoint.toPoint(c, h, facing, top, getWidth(), getHeight());
+                g2d.fillOval((int) p.getX()-5, (int) p.getY()-5, 10, 10);
+            }
+        }
+
+
+
         this.validate();
 
     }
@@ -146,5 +207,8 @@ public class    GamePanel extends JPanel {
         g2d.setFont(new Font("Arial", Font.BOLD, 30));
         g2d.drawString("You finished the race in " + time + " seconds!", 100, 100);
         g2d.drawString("Pres enter to reset",100,200);
+    }
+    public void setLidarHitPoints(java.util.List<MPoint3d> lidarHitPoints) {
+        this.lidarHitPoints = lidarHitPoints;
     }
 }

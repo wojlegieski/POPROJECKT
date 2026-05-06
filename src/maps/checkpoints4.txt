@@ -1,0 +1,2 @@
+# Meta ustawiona na wprost samochodu (czerwona)
+-450, -625, 50, 250, 255, 0, 0

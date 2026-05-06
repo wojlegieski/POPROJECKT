@@ -1,0 +1,9 @@
+# Prosta startowa, żeby model nabrał prędkości
+straight -350 150 200 200
+
+# Pierwszy zakręt 
+longtrun -850 -150 800 revesexy
+
+# Drugi zakręt (odbity lustrzanie modyfikatorem revesex, by skręcał w drugą stronę)
+longtrun -1450 -950 800
+
