@@ -53,12 +53,6 @@ public class    GamePanel extends JPanel {
 
 
 
-
-
-
-
-
-
     GamePanel() {
         this.setLayout(new BorderLayout());
 

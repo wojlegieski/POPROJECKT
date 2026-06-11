@@ -20,21 +20,36 @@ public class Main {
     static int MODEL_UPSCALE_COUNT = 2;
     static Position startPositon=new Position(-300,150);
     static float startAngle=(float) Math.PI;
-    static int targetLapsMap = 2;
+    static int targetLapsMap = 10;
     static float MAX_DIST = 3000;
 
     public static void main(String[] args) {
+        int port = 5005;
+        String mapMode = "5";
+
+        if (args.length >= 2) {
+            port = Integer.parseInt(args[0]);
+            mapMode = args[1];
+        }
+
         List<String> mapSequence = new ArrayList<>();
-//        mapSequence.add("1");
-//        mapSequence.add("7");
-//        mapSequence.add("10");
-//        mapSequence.add("9");
-//        mapSequence.add("8");
-//        mapSequence.add("6");
-//        mapSequence.add("2");
-//        mapSequence.add("3");
-//        mapSequence.add("4");
-        mapSequence.add("5");
+
+        if (mapMode.equals("all")) {
+            mapSequence.add("1");
+            mapSequence.add("7");
+            mapSequence.add("10");
+            mapSequence.add("9");
+            mapSequence.add("8");
+            mapSequence.add("6");
+            mapSequence.add("2");
+            mapSequence.add("3");
+            mapSequence.add("4");
+            mapSequence.add("5");
+        }
+        else {
+            // Domyślnie tylko mapa 5
+            mapSequence.add("5");
+        }
 
         int currentMapIndex = 0;
 
@@ -96,7 +111,7 @@ public class Main {
         double stime = System.nanoTime();
 
         portConnect bridge = new portConnect();
-        bridge.connect(5005);
+        bridge.connect(port);
         boolean remoteUp = false;
         boolean remoteDown = false;
         boolean remoteLeft = false;
@@ -121,9 +136,8 @@ public class Main {
                     if (c.drivedon()) {
                         zaliczoneCheckpoints++;
                     } else {
-                        end = false; // Znaleziono niezaliczony, więc to nie koniec
+                        end = false;
 
-                        // Liczenie odległości za pomocą nowej funkcji
                         float currentDist = getDist(
                                 maluch.getPosition().getX(), maluch.getPosition().getY(),
                                 c.getPosition().getX(), c.getPosition().getY()
@@ -137,14 +151,19 @@ public class Main {
             }
             if(end) {
                 meta.isin(maluch.getPosition());
+
+                float currentDist = getDist(
+                        maluch.getPosition().getX(), maluch.getPosition().getY(),
+                        meta.getPosition().getX(), meta.getPosition().getY()
+                );
+
+                if (currentDist < distToTarget) {
+                    distToTarget = currentDist;
+                }
+
                 if(meta.drivedon()) {
                     curentlap++;
                     if(curentlap==laps) {
-//                            toneThread.stopEngine();
-//                            a.endScreen(time);
-//                            while (true) {
-//                                System.out.println();
-//                                if(a.isEnterkeyPressed()){
 
                                 isWaitingForReset = true;
                                 waitFramesCount = 20;
@@ -595,7 +614,7 @@ public class Main {
                 for (int i = 1; i < poly.length; i++) {
                     path.lineTo(poly[i].getX(), poly[i].getY());
                 }
-                path.closePath(); // Zamykamy kształt pojedynczej drogi
+                path.closePath();
                 combinedArea.add(new Area(path));
             }
         }
